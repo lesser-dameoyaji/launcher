@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <wiringPi.h>
 
 #include <sys/ioctl.h>
@@ -7,6 +9,7 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 
+#include "types.h"
 #include "lcd.h"
 #include "config.h"
 
@@ -63,9 +66,11 @@ int menu_title(unsigned char btn)
 
 		ifr.ifr_addr.sa_family = AF_INET;
 		strncpy(ifr.ifr_name, "wlan0", IFNAMSIZ-1);
-
-		sprintf(&lcd_tvram[0x00], "wlan0");
-		sprintf(&lcd_tvram[0x40], "%s", addr_prev);
+		
+		lcd_clear();
+		lcd_printf("wlan0");
+		lcd_cursor(0, 1, false);
+		lcd_printf("%s", addr_prev);
 	}
 	if(count < 20)
 		count++;
@@ -73,6 +78,7 @@ int menu_title(unsigned char btn)
 	if((count >= 20) && (btn > 0))
 	{
 		close(fd);
+		fd = -1;
 		update = 1;
 		lcd_clear();
 		return 1;
@@ -85,7 +91,10 @@ int menu_title(unsigned char btn)
 	if(strcmp(addr_now, addr_prev) != 0)
 	{
 		// different address
-		strcpy(&lcd_tvram[0x40], addr_now);
+		lcd_clear();
+		lcd_printf("wlan0");
+		lcd_cursor(0, 1, false);
+		lcd_printf("%s", addr_now);
 		strcpy(addr_prev, addr_now);
 		update++;
 	}
@@ -157,22 +166,18 @@ int menu_launch(unsigned char btn)
 	// display
 	if(update > 0)
 	{
+		char* format;
 		update = 0;
 		lcd_clear();
-
-		if(cursor == 0)
+		
+		format = (cursor == 0) ? "\x7e%s" : " %s";
+		lcd_printf(format, menu_item[index].title);
+		
+		if ((index+1) < menu_item_max)
 		{
-			lcd_tvram[0x00] = 0x7e;
-			lcd_tvram[0x40] = ' ';
-		}
-		else
-		{
-			lcd_tvram[0x00] = ' ';
-			lcd_tvram[0x40] = 0x7e;
-		}
-		for(i=0; (i < 2) && ((index+i) < menu_item_max); i++)
-		{
-			sprintf(&lcd_tvram[0x40 * i + 1], "%s", menu_item[index + i].title);
+			lcd_cursor(0, 1, false);
+			format = (cursor == 0) ? " %s" : "\x7e%s";
+			lcd_printf(format, menu_item[index + 1].title);
 		}
 		lcd_flush();
 	}
