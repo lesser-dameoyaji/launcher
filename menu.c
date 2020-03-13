@@ -51,7 +51,6 @@ unsigned char update = 1;
 
 int menu_title(unsigned char btn)
 {
-	static int count = 0;
 	static int fd = -1;
 	static char addr_prev[32] = "0.0.0.0";
 	static char addr_now[32] = "";
@@ -72,10 +71,8 @@ int menu_title(unsigned char btn)
 		lcd_cursor(0, 1, false);
 		lcd_printf("%s", addr_prev);
 	}
-	if(count < 20)
-		count++;
 
-	if((count >= 20) && (btn > 0))
+	if(btn > 0)
 	{
 		close(fd);
 		fd = -1;
@@ -217,7 +214,7 @@ int menu_init(void)
 int menu(void)
 {
 	int i;
-	unsigned char btn;
+	unsigned char btn = 0;
 	static unsigned char mn = 0;
 
 	for(i=0; i<4; i++)
