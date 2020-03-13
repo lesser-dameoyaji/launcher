@@ -248,6 +248,7 @@ int menu(void)
 int pin_init(void)
 {
 	int i;
+	char cmd[256];
 
 	for(i=0; i<4; i++)
 	{
@@ -274,6 +275,18 @@ int pin_init(void)
 	pullUpDnControl(BTN_R, PUD_UP);
 	pullUpDnControl(BTN_U, PUD_UP);
 	pullUpDnControl(BTN_D, PUD_UP);
+	
+	sprintf(cmd, "raspi-gpio set %d pu", BTN_U);
+	system(cmd);
+
+	sprintf(cmd, "raspi-gpio set %d pu", BTN_R);
+	system(cmd);
+
+	sprintf(cmd, "raspi-gpio set %d pu", BTN_D);
+	system(cmd);
+
+	sprintf(cmd, "raspi-gpio set %d pu", BTN_L);
+	system(cmd);
 
 	return 0;
 }
